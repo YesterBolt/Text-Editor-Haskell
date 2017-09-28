@@ -1,0 +1,72 @@
+{-
+    Autor: Antônio Angelo Passini Júnior
+    Estudante da Universidade Federal de Uberlândia (UFU)
+    Data: 27/09/2017
+    Objetivo: Desenvolver um editor de texto em Haskell
+-}
+
+type Palavra = String
+type Linha = [Palavra]
+
+textoTeste :: String
+textoTeste = "Esse eh um texto usado para realizar o teste do codigo a seguir, o qual possui a funcionalidade de um editor de texto."
+
+espacoBranco :: [Char]
+espacoBranco = ['\n', '\t', ' ']
+
+pertence :: Char -> [Char] -> Bool
+pertence char [] = False
+pertence char (x:xs)
+    |char == x = True
+    |otherwise = pertence char xs
+    
+devolvePalavra :: String -> String
+devolvePalavra [] = []
+devolvePalavra (x:xs)
+    |pertence x espacoBranco = []
+    |otherwise = [x] ++ (devolvePalavra xs)
+
+removePalavra :: String -> String
+removePalavra [] = []
+removePalavra (x:xs)
+    |pertence x espacoBranco = removaEspaco xs
+    |otherwise = removePalavra xs
+    
+removaEspaco :: String -> String
+removaEspaco [] = []
+removaEspaco (x:xs)
+    |pertence x espacoBranco = removaEspaco xs
+    |otherwise = (x:xs)
+    
+obtemPalavras :: String -> [Palavra]
+obtemPalavras [] = []
+obtemPalavras x = [devolvePalavra x] ++ obtemPalavras (removePalavra x)
+
+obtemLinha :: Int -> [Palavra] -> Linha
+obtemLinha _ [] = []
+obtemLinha comp (x:xs)
+    |length (x) <= comp = [x] ++ obtemLinha (comp - (length (x) + 1)) xs
+    |otherwise = []
+-- O tamanho deve ser (comp - (length (x) + 1)) pois após uma palavra deve haver um espaço
+
+removeLinha :: Int -> [Palavra] -> [Palavra]
+removeLinha _ [] = []
+removeLinha comp (x:xs)
+    |length (x) <= comp = removeLinha (comp - (length (x) + 1)) xs
+    |otherwise = (x:xs)
+    
+tamLinha :: Int
+tamLinha = 50
+
+obtemLinhas :: [Palavra] -> [Linha]
+obtemLinhas [] = []
+obtemLinhas x = obtemLinha tamLinha x : obtemLinhas (removeLinha tamLinha x)
+
+geraLinhas :: String -> [Linha]
+geraLinhas x = obtemLinhas (obtemPalavras x)
+
+juntaLinhas :: [Linha] -> String
+juntaLinhas [] = []
+juntaLinhas ((x:xs):xss)
+    |xs == [] = x ++ "\n" ++ juntaLinhas xss
+    |otherwise = x ++ " " ++ juntaLinhas ((xs):xss)
